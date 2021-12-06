@@ -30,7 +30,7 @@ jobs:
             context: ./
             file: ./Dockerfile
             push: true
-            tags: ${{ secrets.DOCKER_USER }}/saunaCbOccupancy:latest
+            tags: ${{ secrets.DOCKER_USER }}/sauna-cb-occupancy:latest
 
         - name: Image digest
           run: echo ${{ steps.docker_build.outputs.digest }}
