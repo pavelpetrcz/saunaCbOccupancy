@@ -3,6 +3,6 @@ from time import sleep
 
 if __name__ == '__main__':
     while True:
-        # run ever two minutes
-        sleep(120)
+        # run every minute
+        sleep(60)
         scraper.scrape()
