@@ -4,6 +4,4 @@ RUN apt-get update && apt-get install -y python3-pip
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 RUN pip install df2gspread
-COPY . /saunaCbOccupancy
-WORKDIR ./
-CMD python ./saunaCbOccupancy
+CMD python main.py
