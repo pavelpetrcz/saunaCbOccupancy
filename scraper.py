@@ -13,7 +13,7 @@ def scrape():
     page = r.get('https://www.szcb.cz')
     soup = bs(page.content, "html.parser")
 
-    l_ist = []
+    datalist = []
 
     # find all elements p and select 25th element of result list
     all_p = soup.find_all("p")
@@ -24,13 +24,13 @@ def scrape():
     t = time.strftime("%H:%M:%S", time.localtime())
 
     # prepare list of values
-    l_ist.append(d)
-    l_ist.append(t)
-    l_ist.append(int(o[0]))
-    l_ist = [l_ist]
+    datalist.append(d)
+    datalist.append(t)
+    datalist.append(int(o[0]))
+    datalist = [datalist]
 
     # convert to dataframe
-    df = pd.DataFrame(l_ist)
+    df = pd.DataFrame(datalist)
 
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
