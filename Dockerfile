@@ -5,5 +5,5 @@ COPY requirements.txt ./
 RUN pip install -r requirements.txt
 RUN pip install df2gspread
 COPY . /saunaCbOccupancy
-WORKDIR /saunaCbOccupancy
+WORKDIR ./
 CMD python ./saunaCbOccupancy
