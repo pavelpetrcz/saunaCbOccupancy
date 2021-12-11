@@ -16,9 +16,8 @@ def scrape(sleepBefore):
     :return:
     """
     try:
-
         sleep(sleepBefore)
-        element_value = getValueFromPage()
+        element_value = getValueFromPage(0)
 
         # prepare data and time
         date_and_time = time.strftime("%Y-%m-%d %H:%M:%S.000000", time.localtime())
@@ -58,7 +57,13 @@ def isCloseToWholeHour():
     return True if minutes in range(55, 2) else False
 
 
-def getValueFromPage():
+def getValueFromPage(sleepBefore):
+    """
+    load HTML & extract data
+    :param sleepBefore: secs to sleep before request
+    :return: sauna occupancy
+    """
+    sleep(sleepBefore)
     # load html of page and parse
     page = r.get('https://www.szcb.cz')
     soup = bs(page.content, "html.parser")

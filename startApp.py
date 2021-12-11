@@ -7,8 +7,11 @@ if __name__ == '__main__':
         actual_occupancy = 1
         while True:
             if actual_occupancy == 0:
-                wait = 20 if actions.isCloseToWholeHour() else wait = 300
-                actual_occupancy = actions.getValueFromPage()
+                if actions.isCloseToWholeHour():
+                    wait = 20
+                else:
+                    wait = 300
+                actual_occupancy = actions.getValueFromPage(wait)
             else:
                 actual_occupancy = actions.scrape(60)
     except BaseException as e:
