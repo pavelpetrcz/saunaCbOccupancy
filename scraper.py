@@ -20,12 +20,10 @@ def scrape():
     o = all_p[25].find("span").contents
 
     # prepare data and time
-    d = time.strftime("%d.%m.%Y", time.localtime())
-    t = time.strftime("%H:%M:%S", time.localtime())
+    d = time.strftime("%Y-%m-%d %H:%M:%S.000000", time.localtime())
 
     # prepare list of values
     datalist.append(d)
-    datalist.append(t)
     datalist.append(int(o[0]))
     datalist = [datalist]
 
