@@ -4,8 +4,8 @@ import logging
 if __name__ == '__main__':
     logging.basicConfig(filename='/var/log/saunaCbOccupancy.log', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(message)s')
     try:
-        actual_occupancy = 1
         while True:
+            actual_occupancy = 1
             if actual_occupancy == 0:
                 if actions.isCloseToWholeHour():
                     wait = 20
