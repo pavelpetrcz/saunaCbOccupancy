@@ -32,14 +32,16 @@ def scrape(sleepBefore):
         scope = ['https://spreadsheets.google.com/feeds',
                  'https://www.googleapis.com/auth/drive']
         cred = ServiceAccountCredentials.from_json_keyfile_name("deepnote.json", scope)
+        #spreadsheet_key = '12DQLmzuFoxu_xK253xB4u-e-CfS6bSHj0cnM2_wb_3Y' #PROD spreadsheet
+        spreadsheet_key = '1ncUzUT_Lyv1YrLc4IXKlNs-8KWa6tBYlpnDdmujL3QU' # TEST spreadsheet
 
         # download dataframe from GS
-        ddf = g2d.download(gfile="12DQLmzuFoxu_xK253xB4u-e-CfS6bSHj0cnM2_wb_3Y", credentials=cred, row_names=True,
-                           start_cell='A2')
+        ddf = g2d.download(gfile=spreadsheet_key, credentials=cred, row_names=True, start_cell='A2')
+
+        # merge two DF
         final_df = pd.concat([ddf, df], ignore_index=True)
 
         # upload updated dataframe to GS
-        spreadsheet_key = '12DQLmzuFoxu_xK253xB4u-e-CfS6bSHj0cnM2_wb_3Y'
         wks_name = 'data'
         d2g.upload(final_df, spreadsheet_key, wks_name, credentials=cred, row_names=True, clean=True, col_names=True)
 
