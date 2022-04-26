@@ -8,16 +8,18 @@ from bs4 import BeautifulSoup as bs
 from df2gspread import df2gspread as d2g
 from df2gspread import gspread2df as g2d
 from oauth2client.service_account import ServiceAccountCredentials
+import psycopg2
+from psycopg2 import Error
 
 
-def scrape(sleepBefore):
+def scrape(sleepBefore, databaseConnection):
     """
     load HTML, extract/generate data and save to G-Spreadsheet
     :return:
     """
     try:
         sleep(sleepBefore)
-        element_value = getValueFromPage(0)
+        element_value = getValueFromWebsite(0)
 
         # prepare data and time
         date_and_time = time.strftime("%Y-%m-%d %H:%M:%S.000000", time.localtime())
@@ -26,29 +28,15 @@ def scrape(sleepBefore):
         datalist = [date_and_time, element_value]
         datalist = [datalist]
 
-        # convert to dataframe
-        df = pd.DataFrame(datalist)
+        databaseConnection.c
 
-        scope = ['https://spreadsheets.google.com/feeds',
-                 'https://www.googleapis.com/auth/drive']
-        cred = ServiceAccountCredentials.from_json_keyfile_name("deepnote.json", scope)
-
-        # download dataframe from GS
-        ddf = g2d.download(gfile="12DQLmzuFoxu_xK253xB4u-e-CfS6bSHj0cnM2_wb_3Y", credentials=cred, row_names=True,
-                           start_cell='A2')
-        final_df = pd.concat([ddf, df], ignore_index=True)
-
-        # upload updated dataframe to GS
-        spreadsheet_key = '12DQLmzuFoxu_xK253xB4u-e-CfS6bSHj0cnM2_wb_3Y'
-        wks_name = 'data'
-        d2g.upload(final_df, spreadsheet_key, wks_name, credentials=cred, row_names=True, clean=True, col_names=True)
 
     except BaseException as e:
         logging.warning("scraping failed")
         logging.exception(e)
 
 
-def isCloseToWholeHour():
+def isTimeframeAroundWholeHour():
     """
     return True if time is between XX:00 and XX:05
     :return: boolean
@@ -57,7 +45,7 @@ def isCloseToWholeHour():
     return True if minutes in range(55, 2) else False
 
 
-def getValueFromPage(sleepBefore):
+def getValueFromWebsite(sleepBefore):
     """
     load HTML & extract data
     :param sleepBefore: secs to sleep before request
@@ -73,3 +61,33 @@ def getValueFromPage(sleepBefore):
     element = all_p[25].find("span").contents
     element_value = int(element[0])
     return element_value
+
+
+def getDBconn():
+    try:
+        # Connect to an existing database
+        connection = psycopg2.connect(user="postgres",
+                                      password="postgres",
+                                      host="127.0.0.1",
+                                      port="5432",
+                                      database="postgres")
+
+        # Create a cursor to perform database operations
+        cursor = connection.cursor()
+        # Print PostgreSQL details
+        print("PostgreSQL server information")
+        print(connection.get_dsn_parameters(), "\n")
+        # Executing a SQL query
+        cursor.execute("SELECT version();")
+        # Fetch result
+        record = cursor.fetchone()
+        print("You are connected to - ", record, "\n")
+        return cursor
+    except (Exception, Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+    finally:
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+
