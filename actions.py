@@ -1,56 +1,40 @@
 import logging
+import os
 import time
 from time import sleep
 
-import pandas as pd
+import psycopg2
 import requests as r
 from bs4 import BeautifulSoup as bs
-from df2gspread import df2gspread as d2g
-from df2gspread import gspread2df as g2d
-from oauth2client.service_account import ServiceAccountCredentials
+from psycopg2 import Error
 
 
-def scrape(sleepBefore):
+def scrape(sleepBefore, databaseConnection):
     """
     load HTML, extract/generate data and save to G-Spreadsheet
     :return:
     """
     try:
         sleep(sleepBefore)
-        element_value = getValueFromPage(0)
+        element_value = getValueFromWebsite(0)
 
         # prepare data and time
         date_and_time = time.strftime("%Y-%m-%d %H:%M:%S.000000", time.localtime())
 
-        # prepare list of values
-        datalist = [date_and_time, element_value]
-        datalist = [datalist]
-
-        # convert to dataframe
-        df = pd.DataFrame(datalist)
-
-        scope = ['https://spreadsheets.google.com/feeds',
-                 'https://www.googleapis.com/auth/drive']
-        cred = ServiceAccountCredentials.from_json_keyfile_name("deepnote.json", scope)
-        #spreadsheet_key = '12DQLmzuFoxu_xK253xB4u-e-CfS6bSHj0cnM2_wb_3Y' #PROD spreadsheet
-        spreadsheet_key = '1ncUzUT_Lyv1YrLc4IXKlNs-8KWa6tBYlpnDdmujL3QU' # TEST spreadsheet
-
-        # download dataframe from GS
-        ddf = g2d.download(gfile=spreadsheet_key, credentials=cred, row_names=True, start_cell='A2')
-
-        # merge two DF
-        final_df = pd.concat([ddf, df], ignore_index=True)
-
-        # upload updated dataframe to GS
-        wks_name = 'data'
-        d2g.upload(final_df, spreadsheet_key, wks_name, credentials=cred, row_names=True, clean=True, col_names=True)
-
+        # insert to database
+        cursor = databaseConnection.cursor()
+        postgres_insert_query = """ INSERT INTO sauna_cb_occupancy (row_id, timestamp, occupancy) VALUES (%s,%s,%s)"""
+        record_to_insert = (5, date_and_time, element_value)
+        cursor.execute(postgres_insert_query, record_to_insert)
+        databaseConnection.commit()
+    except (Exception, psycopg2.Error) as error:
+        print("Failed to insert record into mobile table", error)
     except BaseException as e:
         logging.warning("scraping failed")
         logging.exception(e)
 
 
-def isCloseToWholeHour():
+def isTimeframeAroundWholeHour():
     """
     return True if time is between XX:00 and XX:05
     :return: boolean
@@ -59,7 +43,7 @@ def isCloseToWholeHour():
     return True if minutes in range(55, 2) else False
 
 
-def getValueFromPage(sleepBefore):
+def getValueFromWebsite(sleepBefore):
     """
     load HTML & extract data
     :param sleepBefore: secs to sleep before request
@@ -75,3 +59,21 @@ def getValueFromPage(sleepBefore):
     element = all_p[25].find("span").contents
     element_value = int(element[0])
     return element_value
+
+
+def getDBconn():
+    try:
+        # Connect to an existing database
+        db_pass = os.getenv("db_pass")
+        connection = psycopg2.connect(user="pavelpetrcz",
+                                      password=db_pass,
+                                      host="0.0.0.0",
+                                      port="5432",
+                                      database="data_analysis")
+
+        return connection
+    except (Exception, Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+    finally:
+        if connection:
+            connection.close()
