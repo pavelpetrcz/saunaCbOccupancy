@@ -69,7 +69,7 @@ def getDBconn():
                                       password=db_pass,
                                       host="0.0.0.0",
                                       port="5432",
-                                      database="data_analysis")
+                                      database="sauna_occupancy")
 
         return connection
     except (Exception, Error) as error:
