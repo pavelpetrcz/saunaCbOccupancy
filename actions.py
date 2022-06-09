@@ -67,7 +67,7 @@ def getDBconn():
         db_pass = os.getenv("db_pass")
         connection = psycopg2.connect(user="pavelpetrcz",
                                       password=db_pass,
-                                      host="0.0.0.0",
+                                      host="172.17.0.2",
                                       port="5432",
                                       database="sauna_occupancy")
 
