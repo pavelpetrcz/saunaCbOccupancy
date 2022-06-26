@@ -1,5 +1,5 @@
-import logging
 import os
+import sys
 import time
 from time import sleep
 
@@ -30,8 +30,7 @@ def scrape(sleepBefore, databaseConnection):
     except (Exception, psycopg2.Error) as error:
         print("Failed to insert record into mobile table", error)
     except BaseException as e:
-        logging.warning("scraping failed")
-        logging.exception(e)
+        sys.stderr.write('scraping failed\n')
 
 
 def isTimeframeAroundWholeHour():
@@ -73,8 +72,4 @@ def getDBconn():
 
         return connection
     except (Exception, Error) as error:
-        print("Error while connecting to PostgreSQL", error)
-    finally:
-        if connection:
-            connection.close()
-            print("PostgreSQL connection is closed")
+        sys.stderr.write("error when establishing DB connection")
