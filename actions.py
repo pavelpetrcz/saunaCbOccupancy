@@ -23,10 +23,12 @@ def scrape(sleepBefore, databaseConnection):
 
         # insert to database
         cursor = databaseConnection.cursor()
-        postgres_insert_query = """ INSERT INTO public.sauna_cb_occupancy (row_id, timestamp, occupancy) VALUES (%s,%s,%s)"""
+        postgres_insert_query = "INSERT INTO public.sauna_cb_occupancy (row_id, timestamp, occupancy) VALUES (%s,%s,%s)"
         record_to_insert = (5, date_and_time, element_value)
         cursor.execute(postgres_insert_query, record_to_insert)
         databaseConnection.commit()
+        sys.stderr.write('scrape value:' + str(element_value))
+        return element_value
     except (Exception, psycopg2.Error) as error:
         print("Failed to insert record into mobile table", error)
     except BaseException as e:
