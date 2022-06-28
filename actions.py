@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import uuid
 from time import sleep
 
 import psycopg2
@@ -16,15 +17,16 @@ def scrape(sleepBefore, databaseConnection):
     """
     try:
         sleep(sleepBefore)
-        element_value = getValueFromWebsite(0)
 
-        # prepare data and time
+        # prepare data
+        element_value = getValueFromWebsite(0)
         date_and_time = time.strftime("%Y-%m-%d %H:%M:%S.000000", time.localtime())
+        row_id = uuid.uuid4()
 
         # insert to database
         cursor = databaseConnection.cursor()
         postgres_insert_query = "INSERT INTO public.sauna_cb_occupancy (row_id, timestamp, occupancy) VALUES (%s,%s,%s)"
-        record_to_insert = (5, date_and_time, element_value)
+        record_to_insert = (row_id, date_and_time, element_value)
         cursor.execute(postgres_insert_query, record_to_insert)
         databaseConnection.commit()
         sys.stderr.write('scrape value:' + str(element_value))
@@ -74,4 +76,4 @@ def getDBconn():
 
         return connection
     except (Exception, Error) as error:
-        sys.stderr.write("error when establishing DB connection")
+        sys.stderr.write("error when establishing DB connection" + error)
