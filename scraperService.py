@@ -52,7 +52,7 @@ def getValueFromWebsite(sleepBefore):
     page = r.get('https://www.szcb.cz')
     soup = bs(page.content, "html.parser")
 
-    # find all elements p and select 25th element of result list
+    # find all elements p (paragraphs) and select 25th element of result list
     all_p = soup.find_all("p")
     element = all_p[25].find("span").contents
     element_value = int(element[0])

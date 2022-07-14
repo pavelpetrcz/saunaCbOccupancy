@@ -6,11 +6,10 @@ from psycopg2 import Error
 
 def getDBconn():
     """
-    
-    :return:
+    Establish connection to PostgreSQL DB
+    :return: conn object
     """
     try:
-
         # Load env variables
         db_pass = os.getenv("db_pass")
         user = os.getenv("user")
@@ -27,4 +26,4 @@ def getDBconn():
 
         return connection
     except (Exception, Error) as error:
-        sys.stderr.write("error when establishing DB connection")
+        sys.stderr.write("error when establishing DB connection" + str(error))
